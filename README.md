@@ -3,11 +3,11 @@ CVAT command line interface
 
 create multiple tasks  
 required directory structure  
-your_directory_path/task_1_images
-                   /task_2_images
-                   /task_3_images
-                   .
-                   .
+your_directory_path/task_1_images  
+                   /task_2_images  
+                   /task_3_images  
+                   .  
+                   .  
 ```
 python worker.py -c your_directory_path  
 ```

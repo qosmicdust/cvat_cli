@@ -1,15 +1,17 @@
 # cvat_cli
 CVAT command line interface
 
+You have to edit auth, host, port in worker.py
+
 ### create multiple tasks  
 #### required directory structure  
-your_directory_path/task_1_images  
-your_directory_path/task_2_images  
-your_directory_path/task_3_images  
+images_directory/task_1_images  
+images_directory/task_2_images  
+images_directory/task_3_images  
                    .  
                    .  
 ```
-python worker.py -c your_directory_path  
+python worker.py -c images_directory --labels label_file_path
 ```
 ### delete multiple tasks  
 ```

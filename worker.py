@@ -1,47 +1,52 @@
-import argparse
-import os
-import subprocess
+from argparse import ArgumentParser
+from os import remove, join, listdir
+from os.path import isdir
+from subprocess import run
 import sys
 
 
-parser = argparse.ArgumentParser(description='')
-parser.add_argument('-c','--create', help='create tasks')
-parser.add_argument('-r','--remove', nargs='+', type=int, help='remove tasks')
-parser.add_argument('-d','--dump', nargs='+', type=int, help='dump annotation')
-parser.add_argument('-l','--labels', help='label path')
-parser.add_argument('-o','--output', help='output file name')
+parser = ArgumentParser(description='')
+parser.add_argument(
+    '-c', '--create', help='create tasks')
+parser.add_argument(
+    '-r', '--remove', nargs='+', type=int, help='remove tasks')
+parser.add_argument(
+    '-d', '--dump', nargs='+', type=int, help='dump annotation')
+parser.add_argument(
+    '-l', '--labels', help='label path')
+parser.add_argument(
+    '-o', '--output', help='output file name')
 args = parser.parse_args()
 
-# edit here
-auth = 'login_id:login_password'
-host = 'server_ip_address_or_localhost'
-port = 'port_number_E.g._8080'
+auth = 'account:password'
+host = 'localhost'
+port = 8080
 
 
-def create(src,label):
+def create(src, label):
 
     global auth
     global host
     global port
 
-    if not os.path.isdir(src):
+    if not isdir(src):
         print(f'{src} is not a directory.')
         sys.exit()
     else:
-
-        for dir in os.listdir(src):
+        for dir in listdir(src):
             images = []
             if '.DS' in dir:
-                os.remove(os.path.join(src,dir))
+                remove(join(src, dir))
                 print('.DS_store has been removed.')
-            elif os.listdir(os.path.join(src,dir)):
-                for img in os.listdir(os.path.join(src,dir)):
-                    images.append(os.path.join(src,dir,img))
+            elif listdir(join(src, dir)) and '@' not in dir:
+                for img in listdir(join(src, dir)):
+                    images.append(join(src, dir, img))
 
-                label = 'test_labels.json'
-                cmd = f'python cli.py --auth {auth} --server-host {host} --server-port {port} create "{dir}" --labels {label} local {" ".join(images)}'
+                cmd = f'python cli.py --auth {auth} --server-host {host} ' +\
+                    f'--server-port {port} create "{dir}" --labels {label} ' +\
+                    f'local {" ".join(images)}'
                 # print(cmd)
-                subprocess.call(cmd,shell=True)
+                run(cmd, shell=True)
             else:
                 print(f'no files in {dir}')
 
@@ -52,31 +57,34 @@ def delete(task_ids):
     global host
     global port
 
-    for i in range(task_ids[0],task_ids[-1]+1):
-        cmd = f'python cli.py --auth {auth} --server-host {host} --server-port {port} delete {i}'
+    for i in range(task_ids[0], task_ids[-1]+1):
+        cmd = f'python cli.py --auth {auth} --server-host {host} ' +\
+            f'--server-port {port} delete {i}'
         # print(cmd)
-        subprocess.call(cmd,shell=True)
+        run(cmd, shell=True)
 
 
-def dump(task_ids,output):
+def dump(task_ids, output_path):
 
     global auth
     global host
     global port
 
-    for task_id in range(task_ids[0],task_ids[-1]+1):
+    for task_id in range(task_ids[0], task_ids[-1]+1):
 
-        output = str(task_id)+'.json'
-        cmd = f'python cli.py --auth {auth} --server-host {host} --server-port {port} dump --format "COCO 1.0" {task_id} {output}'
+        output = join(output_path, str(task_id)+'.json')
+
+        cmd = f'python cli.py --auth {auth} --server-host {host} ' +\
+            f'--server-port {port} dump --format "COCO 1.0" {task_id} {output}'
         # print(cmd)
-        subprocess.call(cmd,shell=True)
+        run(cmd, shell=True)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 
     if args.create and args.labels:
-        create(args.create,args.labels)
+        create(args.create, args.labels)
     elif args.remove:
         delete(args.remove)
     elif args.dump:
-        dump(args.dump,args.output)
+        dump(args.dump, args.output)
